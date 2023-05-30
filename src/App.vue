@@ -11,7 +11,11 @@
           <button class="p-6 bg-[rgba(77,218,110,0.15)] rounded-[24px]">
             <i class="bx bx-dots-horizontal-rounded"></i>
           </button>
-          <button @click="btn" id="play" class="p-6 bg-[rgba(77,218,110,0.15)] rounded-[24px]">
+          <button
+            @click="btn"
+            id="play"
+            class="p-6 bg-[rgba(77,218,110,0.15)] rounded-[24px]"
+          >
             <i :class="!lamp ? 'bx bx-play' : 'bx bx-pause'"></i>
           </button>
           <button class="p-6 bg-[rgba(77,218,110,0.15)] rounded-[24px]">
@@ -35,7 +39,6 @@ let btn = () => {
   lamp.value = !lamp.value;
 
   if (lamp.value) {
-
     setTimeOutResult.value = setInterval(() => {
       end.value = end.value - 1;
       sekunt.textContent = end.value;
@@ -57,10 +60,11 @@ let btn = () => {
       if (minute.value == -1) {
         clearInterval(setTimeOutResult.value);
         minute.value = 25;
-        min.textContent = minute.value
+        min.textContent = minute.value;
         end.value = 60;
+        lamp.value = false;
       }
-    }, 1000);
+    }, 100);
   }
 
   if (!lamp.value) {
