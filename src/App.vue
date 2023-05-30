@@ -7,6 +7,78 @@
     "
   >
     <div class="container grid place-items-center h-screen mx-auto">
+      <button
+        @click="toggleModal"
+        :class="
+          work
+            ? 'absolute right-14 top-12 text-[30px] text-[#14401d]'
+            : 'absolute right-14 top-12 text-[30px] text-[#471515]'
+        "
+      >
+        <i class="bx bx-cog"></i>
+      </button>
+      <div
+        id="dropdown"
+        :class="
+          modal
+            ? 'absolute top-9 right-10 z-10 rounded-[24px] shadow-lg w-[350px]'
+            : 'hidden'
+        "
+      >
+        <div class="flex items-start justify-between p-4">
+          <h3 class="text-xl font-semibold text-gray-900">Settings</h3>
+          <button
+            @click="toggleModal"
+            type="button"
+            :class="
+              work
+                ? 'text-[#14401d] bg-[#F2FFF5] rounded-lg text-sm p-1.5 ml-auto inline-flex items-center'
+                : 'text-[#471515] bg-[#FFF2F2] rounded-lg text-sm p-1.5 ml-auto inline-flex items-center'
+            "
+            data-modal-hide="defaultModal"
+          >
+            <svg
+              aria-hidden="true"
+              class="w-5 h-5"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
+            <span class="sr-only">Close modal</span>
+          </button>
+        </div>
+        <div class="p-4 flex items-center justify-between">
+          Dark mode
+          <el-switch v-model="dark" />
+        </div>
+        <div class="p-4 flex items-center justify-between">
+          Focus length
+          <input type="number" class="w-20 rounded-lg" value="25"/>
+        </div>
+        <div class="p-4 flex items-center justify-between">
+          Short break length
+          <input type="number" class="w-20 rounded-lg" value="5" />
+        </div>
+        <div class="p-4 flex items-center justify-between">
+          Long break length
+          <input type="number" class="w-20 rounded-lg" value="15" />
+        </div>
+        <div class="p-4 flex items-center justify-between">
+          Auto resume timer
+          <el-switch v-model="autoResume" />
+        </div>
+        <div class="p-4 flex items-center justify-between">
+          Sound
+          <el-switch v-model="sound" />
+        </div>
+      </div>
+
       <div class="timer">
         <div
           :class="
@@ -64,6 +136,9 @@ import { ref, onMounted } from "vue";
 import miyya from "./assets/miyya.svg";
 import cofe from "./assets/cofe.svg";
 
+const modal = ref(false);
+const toggleModal = () => (modal.value = !modal.value);
+
 const status = ref("FOCUS");
 const lamp = ref(false);
 const minute = ref(25);
@@ -71,7 +146,9 @@ const end = ref(60);
 const setTimeOutResult = ref(null);
 const work = ref(false);
 const sch = ref(0);
-const nextLamp = ref(false);
+
+
+// ----------------- refref button start --------------- //
 
 let refresh = () => {
   clearInterval(setTimeOutResult.value);
@@ -99,10 +176,13 @@ let refresh = () => {
   lamp.value = false;
 };
 
+// ----------------- refref button end --------------- //
+
+// ----------------- next button start --------------- //
+
 let next = () => {
-  nextLamp.value = !nextLamp.value;
   clearInterval(setTimeOutResult.value);
-  if (nextLamp.value) {
+  if (status.value == "FOCUS") {
     if (sch.value == 3) {
       minute.value = 15;
       min.textContent = minute.value;
@@ -130,6 +210,10 @@ let next = () => {
   }
   work.value = !work.value;
 };
+
+// ----------------- next button end --------------- //
+
+// ----------------- play and pouse button start --------------- //
 
 let btn = () => {
   lamp.value = !lamp.value;
@@ -183,6 +267,8 @@ let btn = () => {
     clearInterval(setTimeOutResult.value);
   }
 };
+
+// ----------------- play and pouse button end --------------- //
 
 onMounted(() => {});
 </script>
