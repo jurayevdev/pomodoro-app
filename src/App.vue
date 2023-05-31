@@ -13,7 +13,7 @@
       </button>
       <div id="dropdown" :class="modal ? classModal : 'hidden'">
         <div class="flex items-start justify-between p-4">
-          <h3 class="text-xl font-semibold text-gray-900">Settings</h3>
+          <h3 class="text-xl font-semibold">Settings</h3>
         </div>
         <div class="p-4 flex items-center justify-between">
           Dark mode
@@ -21,15 +21,15 @@
         </div>
         <div class="p-4 flex items-center justify-between">
           Focus length
-          <input type="number" class="w-20 rounded-lg" value="25" />
+          <input @click="subFocus" v-model="inputNumber.focus" type="number" class="w-20 rounded-lg" />
         </div>
         <div class="p-4 flex items-center justify-between">
           Short break length
-          <input type="number" class="w-20 rounded-lg" value="5" />
+          <input @click="subSHbreak" v-model="inputNumber.shBreak" type="number" class="w-20 rounded-lg" />
         </div>
         <div class="p-4 flex items-center justify-between">
           Long break length
-          <input type="number" class="w-20 rounded-lg" value="15" />
+          <input @click="subLbreak" v-model="inputNumber.lBreak" type="number" class="w-20 rounded-lg" />
         </div>
         <div class="p-4 flex items-center justify-between">
           Auto resume timer
@@ -66,22 +66,32 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, reactive } from "vue";
 import miyya from "./assets/miyya.svg";
 import cofe from "./assets/cofe.svg";
 
 const modal = ref(false);
 const toggleModal = () => (modal.value = !modal.value);
 
+const dark = ref(false);
+const autoResume = ref(false);
+const sound = ref(false);
+
+const inputNumber = reactive({
+  focus: 25,
+  shBreak: 5,
+  lBreak: 15,
+});
+
 const status = ref("FOCUS");
 const lamp = ref(false);
-const minute = ref(24);
+const minute = ref(inputNumber.focus - 1);
 const end = ref(60);
 const setTimeOutResult = ref(null);
 const work = ref(false);
 const sch = ref(0);
 const classModal = ref(
-  "absolute top-16 bg-[#FFF2F2] right-5 md:top-12 md:right-12 z-10 rounded-[24px] shadow-lg w-[350px]"
+  "absolute top-16 bg-[#FFF2F2] right-5 md:top-12 md:right-12 z-10 rounded-[24px] shadow-lg w-[350px] text-[#471515]"
 );
 const classBtn = ref(
   "p-6 bg-[rgba(255,76,76,0.15)] rounded-[24px] text-[#471515] hover:bg-[#ee8989] focus:bg-[rgba(255,76,76,0.71)]"
@@ -92,27 +102,94 @@ const classStatus = ref(
 );
 const classNumber = ref("text-[#471515]");
 
+// ----------------- submit imput start --------------- //
+
+let subFocus = () => {
+  if (status.value == "FOCUS") {
+    minute.value = inputNumber.focus - 1;
+    if (inputNumber.focus < 10) {
+      min.textContent = `0${inputNumber.focus}`;
+    } else {
+      min.textContent = inputNumber.focus;
+    }
+    if (autoResume.value == true) {
+      clearInterval(setTimeOutResult.value);
+      lamp.value = false
+    }
+    sekunt.textContent = "00";
+    end.value = 60;
+  }
+}
+
+let subSHbreak = () => {
+  if (status.value == "SHORT BREAK") {
+    minute.value = inputNumber.shBreak - 1;
+    if (inputNumber.shBreak < 10) {
+      min.textContent = `0${inputNumber.shBreak}`;
+    } else {
+      min.textContent = inputNumber.shBreak;
+    }
+    if (autoResume.value == true) {
+      clearInterval(setTimeOutResult.value);
+      lamp.value = false
+    }
+    sekunt.textContent = "00";
+    end.value = 60;
+  }
+}
+
+let subLbreak = () => {
+  if (status.value == "LONG BREAK") {
+    minute.value = inputNumber.lBreak - 1;
+    if (inputNumber.lBreak < 10) {
+      min.textContent = `0${inputNumber.lBreak}`;
+    } else {
+      min.textContent = inputNumber.lBreak;
+    }
+    if (autoResume.value == true) {
+      clearInterval(setTimeOutResult.value);
+      lamp.value = false
+    }
+    sekunt.textContent = "00";
+    end.value = 60;
+  }
+};
+
+// ----------------- submit imput end --------------- //
+
 // ----------------- refref button start --------------- //
 
 let refresh = () => {
   clearInterval(setTimeOutResult.value);
   if (work.value) {
     if (status.value == "LONG BREAK") {
-      minute.value = 14;
-      min.textContent = "15";
+      minute.value = inputNumber.lBreak - 1;
+      if (inputNumber.lBreak < 10) {
+        min.textContent = `0${minute.value + 1}`;
+      } else {
+        min.textContent = minute.value + 1;
+      }
       end.value = 60;
       sekunt.textContent = "00";
       status.value = "LONG BREAK";
     } else {
-      minute.value = 4;
-      min.textContent = "05";
+      minute.value = inputNumber.shBreak - 1;
+      if (inputNumber.shBreak < 10) {
+        min.textContent = `0${minute.value + 1}`;
+      } else {
+        min.textContent = minute.value + 1;
+      }
       end.value = 60;
       sekunt.textContent = "00";
       status.value = "SHORT BREAK";
     }
   } else {
-    minute.value = 24;
-    min.textContent = "25";
+    minute.value = inputNumber.focus - 1;
+    if (inputNumber.focus < 10) {
+      min.textContent = `0${minute.value + 1}`;
+    } else {
+      min.textContent = minute.value + 1;
+    }
     end.value = 60;
     sekunt.textContent = "00";
     status.value = "FOCUS";
@@ -128,15 +205,19 @@ let next = () => {
   clearInterval(setTimeOutResult.value);
   if (status.value == "FOCUS") {
     if (sch.value == 3) {
-      minute.value = 14;
-      min.textContent = minute.value + 1;
+      minute.value = inputNumber.lBreak - 1;
+      if (inputNumber.lBreak < 10) {
+        min.textContent = `0${minute.value + 1}`;
+      } else {
+        min.textContent = minute.value + 1;
+      }
       end.value = 60;
       sekunt.textContent = "00";
       status.value = "LONG BREAK";
       lamp.value = false;
       sch.value = 0;
       classModal.value =
-        "absolute top-16 bg-[#F2FFF5] right-5 md:top-12 md:right-12 z-10 rounded-[24px] shadow-lg w-[350px]";
+        "absolute top-16 bg-[#F2FFF5] right-5 md:top-12 md:right-12 z-10 rounded-[24px] shadow-lg w-[350px] text-[#153047]";
       classBtn.value =
         "p-6 bg-[rgba(76,172,255,0.15)] rounded-[24px] text-[#153047] hover:bg-[rgba(76,172,255,0.40)] focus:bg-[rgba(76,172,255,0.62)]";
       classBody.value = "wrapper w-full min-h-screen bg-[#F2F9FF]";
@@ -144,15 +225,19 @@ let next = () => {
         "status border-2 border-[#153047] text-[#153047] bg-[rgba(76,172,255,0.15)]";
       classNumber.value = "text-[#153047]";
     } else {
-      minute.value = 4;
-      min.textContent = `0${minute.value + 1}`;
+      minute.value = inputNumber.shBreak - 1;
+      if (inputNumber.shBreak < 10) {
+        min.textContent = `0${minute.value + 1}`;
+      } else {
+        min.textContent = minute.value + 1;
+      }
       end.value = 60;
       sekunt.textContent = "00";
       status.value = "SHORT BREAK";
       lamp.value = false;
       sch.value = sch.value + 1;
       classModal.value =
-        "absolute top-16 bg-[#F2FFF5] right-5 md:top-12 md:right-12 z-10 rounded-[24px] shadow-lg w-[350px]";
+        "absolute top-16 bg-[#F2FFF5] right-5 md:top-12 md:right-12 z-10 rounded-[24px] shadow-lg w-[350px] text-[#14401D]";
       classBtn.value =
         "p-6 bg-[rgba(77,218,110,0.15)] rounded-[24px] text-[#14401D] hover:bg-[#86e299] focus:bg-[rgba(77,218,110,0.62)]";
       classBody.value = "wrapper w-full min-h-screen bg-[#F2FFF5]";
@@ -161,14 +246,18 @@ let next = () => {
       classNumber.value = "text-[#14401d]";
     }
   } else {
-    minute.value = 24;
-    min.textContent = minute.value + 1;
+    minute.value = inputNumber.focus - 1;
+    if (inputNumber.focus < 10) {
+      min.textContent = `0${minute.value + 1}`;
+    } else {
+      min.textContent = minute.value + 1;
+    }
     end.value = 60;
     sekunt.textContent = "00";
     status.value = "FOCUS";
     lamp.value = false;
     classModal.value =
-      "absolute top-16 bg-[#FFF2F2] right-5 md:top-12 md:right-12 z-10 rounded-[24px] shadow-lg w-[350px]";
+      "absolute top-16 bg-[#FFF2F2] right-5 md:top-12 md:right-12 z-10 rounded-[24px] shadow-lg w-[350px] text-[#471515]";
     classBtn.value =
       "p-6 bg-[rgba(255,76,76,0.15)] rounded-[24px] text-[#471515] hover:bg-[#ee8989] focus:bg-[rgba(255,76,76,0.71)]";
     classBody.value = "wrapper w-full min-h-screen bg-[#FFF2F2]";
@@ -190,6 +279,7 @@ let btn = () => {
     setTimeOutResult.value = setInterval(() => {
       end.value = end.value - 1;
       sekunt.textContent = end.value;
+
       if (minute.value < 10) {
         min.textContent = `0${minute.value}`;
       } else {
@@ -205,31 +295,39 @@ let btn = () => {
       }
 
       if (minute.value == -1) {
-        clearInterval(setTimeOutResult.value);
+        if (autoResume.value == false) {
+          clearInterval(setTimeOutResult.value);
+        }
         work.value = !work.value;
         if (work.value) {
           if (sch.value == 3) {
-            minute.value = 14;
-            min.textContent = minute.value + 1;
+            minute.value = inputNumber.lBreak - 1;
+            if (inputNumber.lBreak < 10) {
+              min.textContent = `0${minute.value + 1}`;
+            } else {
+              min.textContent = minute.value + 1;
+            }
             sch.value = 0;
             status.value = "LONG BREAK";
             classModal.value =
-              "absolute top-16 bg-[#F2FFF5] right-5 md:top-12 md:right-12 z-10 rounded-[24px] shadow-lg w-[350px]";
+              "absolute top-16 bg-[#F2FFF5] right-5 md:top-12 md:right-12 z-10 rounded-[24px] shadow-lg w-[350px] text-[#153047]";
             classBtn.value =
               "p-6 bg-[rgba(76,172,255,0.15)] rounded-[24px] text-[#153047] hover:bg-[rgba(76,172,255,0.40)] focus:bg-[rgba(76,172,255,0.62)]";
             classBody.value = "wrapper w-full min-h-screen bg-[#F2F9FF]";
             classStatus.value =
-              "status border-2 border-[#14401d] text-[#14401d] bg-[rgba(77,218,110,0.15)]";
-            classStatus.value =
               "status border-2 border-[#153047] text-[#153047] bg-[rgba(76,172,255,0.15)]";
             classNumber.value = "text-[#153047]";
           } else {
-            minute.value = 4;
-            min.textContent = `0${minute.value + 1}`;
+            minute.value = inputNumber.shBreak - 1;
+            if (inputNumber.shBreak < 10) {
+              min.textContent = `0${minute.value + 1}`;
+            } else {
+              min.textContent = minute.value + 1;
+            }
             sch.value = sch.value + 1;
             status.value = "SHORT BREAK";
             classModal.value =
-              "absolute top-16 bg-[#F2FFF5] right-5 md:top-12 md:right-12 z-10 rounded-[24px] shadow-lg w-[350px]";
+              "absolute top-16 bg-[#F2FFF5] right-5 md:top-12 md:right-12 z-10 rounded-[24px] shadow-lg w-[350px] text-[#14401D]";
             classBtn.value =
               "p-6 bg-[rgba(77,218,110,0.15)] rounded-[24px] text-[#14401D] hover:bg-[#86e299] focus:bg-[rgba(77,218,110,0.62)]";
             classBody.value = "wrapper w-full min-h-screen bg-[#F2FFF5]";
@@ -238,11 +336,15 @@ let btn = () => {
             classNumber.value = "text-[#14401d]";
           }
         } else {
-          minute.value = 24;
-          min.textContent = minut.value + 1;
+          minute.value = inputNumber.focus - 1;
+          if (inputNumber.focus < 10) {
+            min.textContent = `0${minute.value + 1}`;
+          } else {
+            min.textContent = minute.value + 1;
+          }
           status.value = "FOCUS";
           classModal.value =
-            "absolute top-16 bg-[#FFF2F2] right-5 md:top-12 md:right-12 z-10 rounded-[24px] shadow-lg w-[350px]";
+            "absolute top-16 bg-[#FFF2F2] right-5 md:top-12 md:right-12 z-10 rounded-[24px] shadow-lg w-[350px] text-[#471515]";
           classBtn.value =
             "p-6 bg-[rgba(255,76,76,0.15)] rounded-[24px] text-[#471515] hover:bg-[#ee8989] focus:bg-[rgba(255,76,76,0.71)]";
           classBody.value = "wrapper w-full min-h-screen bg-[#FFF2F2]";
@@ -251,9 +353,11 @@ let btn = () => {
           classNumber.value = "text-[#471515]";
         }
         end.value = 60;
-        lamp.value = false;
+        if (autoResume.value == false) {
+          lamp.value = false;
+        }
       }
-    }, 100);
+    }, 10);
   }
 
   if (!lamp.value) {
