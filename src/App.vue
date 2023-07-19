@@ -381,7 +381,7 @@ let start = () => {
       if (minute.value == -1) {
         stop();
       }
-    }, 100);
+    }, 1000);
   }
 };
 
